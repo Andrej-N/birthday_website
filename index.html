@@ -119,15 +119,8 @@
   <!-- Navbar -->
   <header class="sticky top-0 z-50 bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-100">
     <nav class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-      <a href="/" class="flex items-center gap-2">
-        <div class="w-10 h-10 bg-gold-500 rounded-full flex items-center justify-center">
-          <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="10" />
-            <path
-              d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3z"
-              fill="white" />
-          </svg>
-        </div>
+      <a href="index.html" class="flex items-center gap-2">
+        <img src="assets/img/logo.png" alt="Zlatna Lopta Logo" class="w-12 h-12 object-contain">
         <div>
           <span class="text-xl font-extrabold text-gray-900">Zlatna</span>
           <span class="text-xl font-extrabold text-gold-500"> Lopta</span>
@@ -141,7 +134,7 @@
         <a href="#galerija"
           class="text-sm font-semibold text-gray-700 hover:text-gold-600 transition-colors">Galerija</a>
         <a href="booking.html"
-          class="text-sm font-semibold text-gray-700 hover:text-gold-600 transition-colors">Kalkulator</a>
+          class="text-sm font-semibold text-gray-700 hover:text-gold-600 transition-colors">Rezervacija</a>
         <a href="#kontakt" class="text-sm font-semibold text-gray-700 hover:text-gold-600 transition-colors">Kontakt</a>
         <a href="booking.html"
           class="bg-gold-500 hover:bg-gold-600 text-white px-5 py-2.5 rounded-lg text-sm font-bold transition-all hover:shadow-lg hover:shadow-gold-500/25">
@@ -164,7 +157,7 @@
       <a href="#hrana" class="block py-3 text-sm font-semibold text-gray-700 border-b border-gray-50">Hrana</a>
       <a href="#galerija" class="block py-3 text-sm font-semibold text-gray-700 border-b border-gray-50">Galerija</a>
       <a href="booking.html"
-        class="block py-3 text-sm font-semibold text-gray-700 border-b border-gray-50">Kalkulator</a>
+        class="block py-3 text-sm font-semibold text-gray-700 border-b border-gray-50">Rezervacija</a>
       <a href="#kontakt" class="block py-3 text-sm font-semibold text-gray-700 border-b border-gray-50">Kontakt</a>
       <a href="booking.html"
         class="block mt-3 bg-gold-500 hover:bg-gold-600 text-white text-center px-5 py-3 rounded-lg text-sm font-bold transition-all">
@@ -231,7 +224,8 @@
           <a href="booking.html"
             class="group bg-white/10 backdrop-blur-sm hover:bg-pitch-600 text-white px-8 py-4 rounded-xl text-lg font-bold transition-all border border-pitch-400/40 hover:border-pitch-500 inline-flex items-center justify-center gap-2">
             Kreirajte Vaš Rođendan
-            <svg class="w-5 h-5 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-5 h-5 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor"
+              viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
             </svg>
           </a>
@@ -355,9 +349,15 @@
               <p class="text-gold-100 text-sm">Do 15 dece + animacija</p>
             </div>
             <div class="p-6 flex flex-col flex-grow">
-              <div class="mb-2">
-                <span class="text-4xl font-black text-gray-900">8.500</span>
+              <div class="mb-1">
+                <span class="text-4xl font-black text-gray-900">6.000</span>
                 <span class="text-gray-500 text-lg"> RSD animacija</span>
+              </div>
+              <div class="flex items-center gap-2 mb-2">
+                <span class="line-through text-gray-400 text-sm">8.500 RSD</span>
+                <span
+                  class="inline-flex items-center gap-1 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full animate-pulse">PROMO
+                  CENA</span>
               </div>
               <p class="text-gray-400 text-sm mb-6">+ 10.000 RSD/sat iznajmljivanje</p>
               <ul class="space-y-3 mb-8">
@@ -390,7 +390,7 @@
                   Do 15 dece
                 </li>
               </ul>
-              <a href="booking.html"
+              <a href="booking.html?paket=manja"
                 class="block w-full text-center bg-gold-500 hover:bg-gold-600 text-white py-3 rounded-xl font-bold transition-all hover:shadow-lg hover:shadow-gold-500/25 mt-auto">
                 Izaberite
               </a>
@@ -399,15 +399,21 @@
 
           <!-- Large Group Animation -->
           <article
-            class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-xl hover:border-pitch-200 transition-all duration-300 group flex flex-col">
+            class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-xl hover:border-pitch-200 transition-all duration-300 relative group flex flex-col">
             <div class="bg-gradient-to-r from-pitch-600 to-pitch-700 p-6 text-white">
               <h3 class="text-xl font-bold mb-1">Veća Grupa</h3>
               <p class="text-pitch-100 text-sm">15-30 dece + animacija</p>
             </div>
             <div class="p-6 flex flex-col flex-grow">
-              <div class="mb-2">
-                <span class="text-4xl font-black text-gray-900">15.500</span>
+              <div class="mb-1">
+                <span class="text-4xl font-black text-gray-900">12.000</span>
                 <span class="text-gray-500 text-lg"> RSD animacija</span>
+              </div>
+              <div class="flex items-center gap-2 mb-2">
+                <span class="line-through text-gray-400 text-sm">15.500 RSD</span>
+                <span
+                  class="inline-flex items-center gap-1 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full animate-pulse">PROMO
+                  CENA</span>
               </div>
               <p class="text-gray-400 text-sm mb-6">+ 10.000 RSD/sat iznajmljivanje</p>
               <ul class="space-y-3 mb-8">
@@ -440,7 +446,7 @@
                   15-30 dece
                 </li>
               </ul>
-              <a href="booking.html"
+              <a href="booking.html?paket=veca"
                 class="block w-full text-center bg-pitch-600 hover:bg-pitch-700 text-white py-3 rounded-xl font-bold transition-all hover:shadow-lg hover:shadow-pitch-600/25 mt-auto">
                 Izaberite
               </a>
@@ -451,19 +457,7 @@
         <!-- Animation Themes -->
         <div class="mt-12 sm:mt-16 bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-200">
           <h3 class="text-2xl font-bold text-gray-900 mb-6 text-center">Teme Animacije</h3>
-          <div class="grid sm:grid-cols-3 gap-6">
-
-            <div
-              class="text-center p-6 rounded-xl bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-100 hover:shadow-lg transition-all">
-              <div class="w-14 h-14 bg-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                </svg>
-              </div>
-              <h4 class="font-bold text-gray-900 mb-2">Disko Žurka</h4>
-              <p class="text-gray-500 text-sm">Laseri, svetla, karaoke i ples uz najluđe hitove</p>
-            </div>
+          <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
 
             <div
               class="text-center p-6 rounded-xl bg-gradient-to-br from-pitch-50 to-emerald-50 border border-pitch-100 hover:shadow-lg transition-all">
@@ -473,13 +467,28 @@
                     d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
               </div>
-              <h4 class="font-bold text-gray-900 mb-2">Tematska Zabava</h4>
-              <p class="text-gray-500 text-sm">Survivor, Košarka, Fudbal - sportske igre i takmičenja</p>
+              <h4 class="font-bold text-gray-900 mb-2">Survivor / Fudbal / Košarka</h4>
+              <p class="text-gray-500 text-sm">Sportski program sa profesionalnim animatorima</p>
             </div>
 
             <div
-              class="text-center p-6 rounded-xl bg-gradient-to-br from-gold-50 to-amber-50 border border-gold-100 hover:shadow-lg transition-all">
-              <div class="w-14 h-14 bg-gold-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              class="text-center p-6 rounded-xl bg-gradient-to-br from-amber-50 to-gold-50 border border-amber-200 hover:shadow-lg transition-all relative">
+              <div
+                class="absolute -top-2 -right-2 bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                PREMIUM</div>
+              <div class="w-14 h-14 bg-amber-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                </svg>
+              </div>
+              <h4 class="font-bold text-gray-900 mb-2">Olimpijske Igre</h4>
+              <p class="text-gray-500 text-sm">Premium sportski program sa nagradama za sve učesnike</p>
+            </div>
+
+            <div
+              class="text-center p-6 rounded-xl bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-100 hover:shadow-lg transition-all">
+              <div class="w-14 h-14 bg-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
@@ -487,6 +496,18 @@
               </div>
               <h4 class="font-bold text-gray-900 mb-2">Potraga za Blagom</h4>
               <p class="text-gray-500 text-sm">Avanturistička potraga sa zagonetkama i nagradama</p>
+            </div>
+
+            <div
+              class="text-center p-6 rounded-xl bg-gradient-to-br from-fuchsia-50 to-violet-50 border border-fuchsia-100 hover:shadow-lg transition-all">
+              <div class="w-14 h-14 bg-fuchsia-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
+              </div>
+              <h4 class="font-bold text-gray-900 mb-2">Disco Party</h4>
+              <p class="text-gray-500 text-sm">Laseri, disko ambijent, karaoke i ples uz najluđe hitove</p>
             </div>
           </div>
         </div>
@@ -512,7 +533,7 @@
     <!-- Food Section -->
     <section id="hrana" class="py-16 sm:py-24 bg-white">
       <div class="max-w-7xl mx-auto px-4">
-        <div class="bg-gradient-to-br from-red-500 via-red-600 to-orange-600 rounded-3xl overflow-hidden shadow-2xl">
+        <div class="bg-gradient-to-br from-pitch-800 to-pitch-600 rounded-3xl overflow-hidden shadow-2xl">
           <div class="grid md:grid-cols-2 items-center">
             <div class="p-8 sm:p-12 text-white">
               <div
@@ -523,10 +544,11 @@
                 </svg>
                 Partner za Hranu
               </div>
+              <img src="./pizza-fabrika-logo.png" alt="Pizza Fabrika Logo" class="h-32 mb-6 rounded-xl">
               <h2 class="text-3xl sm:text-4xl font-extrabold mb-4">
                 Pizza Fabrika
               </h2>
-              <p class="text-red-100 text-lg mb-6 leading-relaxed">
+              <p class="text-pitch-50 text-lg mb-6 leading-relaxed">
                 Savršena hrana za savršenu proslavu! Naručite ukusne pice, fokače i bruskete direktno na vašu proslavu.
               </p>
               <div class="bg-white/15 backdrop-blur-sm rounded-xl p-5 mb-8 border border-white/20">
@@ -534,12 +556,12 @@
                   <span class="text-3xl font-black text-gold-300">10%</span>
                   <span class="text-xl font-bold">POPUSTA</span>
                 </div>
-                <p class="text-red-100 text-sm">
+                <p class="text-pitch-50 text-sm">
                   Na pice, fokače i bruskete ako naručite preko nas!
                 </p>
               </div>
               <a href="booking.html"
-                class="inline-flex items-center gap-2 bg-white text-red-600 px-6 py-3 rounded-xl font-bold hover:bg-red-50 transition-all hover:shadow-lg">
+                class="inline-flex items-center gap-2 bg-white text-pitch-800 px-6 py-3 rounded-xl font-bold hover:bg-pitch-50 transition-all hover:shadow-lg">
                 Naručite uz Rezervaciju
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -551,7 +573,7 @@
                 class="w-full max-w-sm bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20 text-center">
                 <div class="text-6xl mb-4">🍕</div>
                 <h3 class="text-2xl font-bold text-white mb-3">Meni</h3>
-                <ul class="text-red-100 space-y-2 text-left">
+                <ul class="text-pitch-50 space-y-2 text-left">
                   <li class="flex items-center gap-2">
                     <svg class="w-4 h-4 text-gold-300 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
                       <path
@@ -573,13 +595,7 @@
                     </svg>
                     Bruskete
                   </li>
-                  <li class="flex items-center gap-2">
-                    <svg class="w-4 h-4 text-gold-300 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
-                      <path
-                        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-                    </svg>
-                    Sokovi i napici
-                  </li>
+
                 </ul>
               </div>
             </div>
@@ -868,11 +884,7 @@
       <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
         <div>
           <div class="flex items-center gap-2 mb-4">
-            <div class="w-8 h-8 bg-gold-500 rounded-full flex items-center justify-center">
-              <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="10" />
-              </svg>
-            </div>
+            <img src="assets/img/logo.png" alt="Zlatna Lopta Logo" class="w-10 h-10 object-contain">
             <span class="text-lg font-bold text-white">Zlatna Lopta</span>
           </div>
           <p class="text-sm leading-relaxed">Sportski balon za nezaboravne dečije rođendane na Vračaru, Beograd.</p>
