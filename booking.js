@@ -293,7 +293,8 @@ bookingForm.addEventListener('submit', (e) => {
     'Ime: ' + parentName + '\n' +
     'Telefon: ' + phone + '\n' +
     'Email: ' + email + '\n' +
-    'Željeni datum: ' + date + '\n\n' +
+    'Željeni datum: ' + date + '\n' +
+    (calSelectedSlots.length > 0 ? 'Željeni termini: ' + calSelectedSlots.map(s => String(s.hour).padStart(2, '0') + ':00').join(', ') + ' (' + calSelectedSlots.length + 'h, ' + String(calSelectedSlots[0].hour).padStart(2, '0') + ':00-' + String(calSelectedSlots[calSelectedSlots.length - 1].hour + 1).padStart(2, '0') + ':00)' + '\n' : '') + '\n' +
     'IZABRANI PAKET:\n' +
     'Iznajmljivanje: ' + state.hours + 'h x 10.000 RSD = ' + formatRSD(rentalTotal) + '\n' +
     'Program: ' + programText + '\n' +
@@ -315,6 +316,10 @@ bookingForm.addEventListener('submit', (e) => {
   `;
 
   // Send via EmailJS
+  const timeSlotText = calSelectedSlots.length > 0
+    ? String(calSelectedSlots[0].hour).padStart(2, '0') + ':00-' + String(calSelectedSlots[calSelectedSlots.length - 1].hour + 1).padStart(2, '0') + ':00 (' + calSelectedSlots.length + 'h)'
+    : '';
+
   emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
     subject: 'Rezervacija Rođendana - Zlatna Lopta',
     message: emailBody,
@@ -322,6 +327,7 @@ bookingForm.addEventListener('submit', (e) => {
     from_email: email,
     phone: phone,
     date: date,
+    time: timeSlotText,
   })
   .then(() => {
     successModal.classList.remove('hidden');
@@ -337,7 +343,10 @@ bookingForm.addEventListener('submit', (e) => {
     document.getElementById('food-interest').checked = false;
     document.getElementById('cake-interest').checked = false;
     document.querySelectorAll('.addon-checkbox').forEach(cb => cb.checked = false);
+    calSelectedSlots = [];
+    calSelectedDiv.classList.add('hidden');
     updateUI();
+    renderWeeklyCalendar();
   })
   .catch((error) => {
     console.error('EmailJS error:', error);
@@ -366,6 +375,381 @@ if (successModal) {
     }
   });
 }
+
+// ============================================
+// Weekly Calendar - Google Calendar Integration
+// ============================================
+
+// UPUTSTVO: Zameni ove vrednosti sa tvojim
+// 1. Napravi Google Cloud projekat: https://console.cloud.google.com/
+// 2. Uključi "Google Calendar API"
+// 3. Napravi API Key (ograniči na Calendar API + tvoj domen)
+// 4. U Google Calendar podešavanjima, postavi kalendar kao javan
+// 5. Kopiraj Calendar ID (obično izgleda kao email adresa)
+// 6. U Google Calendaru dodaj događaje za zauzete termine (npr. "Rođendan" od 16:00-18:00)
+const GCAL_API_KEY = 'TVOJ_API_KEY_OVDE';
+const GCAL_CALENDAR_ID = 'TVOJ_CALENDAR_ID_OVDE';
+
+// Kalendar prikazuje sate od 9:00 do 24:00
+const CAL_HOUR_START = 9;
+const CAL_HOUR_END = 24;
+
+const calWeekly = document.getElementById('cal-weekly');
+const calWeekLabel = document.getElementById('cal-week-label');
+const calPrev = document.getElementById('cal-prev');
+const calNext = document.getElementById('cal-next');
+const calLoading = document.getElementById('cal-loading');
+const calError = document.getElementById('cal-error');
+const calSelectedDiv = document.getElementById('cal-selected');
+const calSelectedText = document.getElementById('cal-selected-text');
+
+const DAY_NAMES_SR = ['Pon', 'Uto', 'Sre', 'Čet', 'Pet', 'Sub', 'Ned'];
+const DAY_NAMES_FULL_SR = ['Ponedeljak', 'Utorak', 'Sreda', 'Četvrtak', 'Petak', 'Subota', 'Nedelja'];
+const MONTH_NAMES_SR = [
+  'Jan', 'Feb', 'Mar', 'Apr', 'Maj', 'Jun',
+  'Jul', 'Avg', 'Sep', 'Okt', 'Nov', 'Dec'
+];
+const MONTH_NAMES_FULL_SR = [
+  'Januar', 'Februar', 'Mart', 'April', 'Maj', 'Jun',
+  'Jul', 'Avgust', 'Septembar', 'Oktobar', 'Novembar', 'Decembar'
+];
+
+// Get Monday of the current week
+function getMonday(d) {
+  const date = new Date(d);
+  const day = date.getDay();
+  const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+  date.setDate(diff);
+  date.setHours(0, 0, 0, 0);
+  return date;
+}
+
+let calWeekStart = getMonday(new Date());
+let calBookedSlots = new Set(); // Set of "YYYY-MM-DD-HH" strings
+let calSelectedSlots = []; // Array of { date: "YYYY-MM-DD", hour: 14 }
+
+// Fetch booked slots from Google Calendar for a given week
+async function fetchBookedSlots(weekStart) {
+  const timeMin = new Date(weekStart).toISOString();
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekEnd.getDate() + 7);
+  const timeMax = weekEnd.toISOString();
+
+  const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(GCAL_CALENDAR_ID)}/events?key=${GCAL_API_KEY}&timeMin=${timeMin}&timeMax=${timeMax}&singleEvents=true&orderBy=startTime&maxResults=200`;
+
+  try {
+    calLoading.classList.remove('hidden');
+    calError.classList.add('hidden');
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('API error');
+    const data = await res.json();
+
+    const booked = new Set();
+    (data.items || []).forEach(event => {
+      if (event.start.date) {
+        // All-day event: mark all hours of that day as booked
+        const startD = new Date(event.start.date);
+        const endD = new Date(event.end.date);
+        for (let d = new Date(startD); d < endD; d.setDate(d.getDate() + 1)) {
+          const ds = d.toISOString().split('T')[0];
+          for (let h = CAL_HOUR_START; h < CAL_HOUR_END; h++) {
+            booked.add(`${ds}-${h}`);
+          }
+        }
+      } else if (event.start.dateTime) {
+        // Timed event: mark each hour the event covers
+        const start = new Date(event.start.dateTime);
+        const end = new Date(event.end.dateTime);
+        for (let t = new Date(start); t < end; t.setHours(t.getHours() + 1)) {
+          const ds = `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(t.getDate()).padStart(2, '0')}`;
+          booked.add(`${ds}-${t.getHours()}`);
+        }
+      }
+    });
+    return booked;
+  } catch (err) {
+    console.error('Google Calendar fetch error:', err);
+    calError.classList.remove('hidden');
+    return new Set();
+  } finally {
+    calLoading.classList.add('hidden');
+  }
+}
+
+// Format date as "YYYY-MM-DD"
+function formatDateStr(d) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+// Render the weekly calendar
+async function renderWeeklyCalendar() {
+  const weekEnd = new Date(calWeekStart);
+  weekEnd.setDate(weekEnd.getDate() + 6);
+
+  // Week label
+  const startLabel = `${calWeekStart.getDate()}. ${MONTH_NAMES_SR[calWeekStart.getMonth()]}`;
+  const endLabel = `${weekEnd.getDate()}. ${MONTH_NAMES_SR[weekEnd.getMonth()]} ${weekEnd.getFullYear()}`;
+  calWeekLabel.textContent = `${startLabel} - ${endLabel}`;
+
+  // Fetch booked slots
+  calBookedSlots = await fetchBookedSlots(calWeekStart);
+
+  const now = new Date();
+  const todayStr = formatDateStr(now);
+  const currentHour = now.getHours();
+
+  // Build table
+  // 8 columns: 1 time column + 7 day columns
+  let html = '<div class="border border-gray-200 rounded-xl overflow-hidden">';
+
+  // Header row with day names and dates
+  html += '<div class="grid grid-cols-8 bg-gray-50 border-b border-gray-200">';
+  html += '<div class="p-2 text-center text-xs font-semibold text-gray-400 border-r border-gray-200">Sat</div>';
+
+  for (let i = 0; i < 7; i++) {
+    const dayDate = new Date(calWeekStart);
+    dayDate.setDate(dayDate.getDate() + i);
+    const dateStr = formatDateStr(dayDate);
+    const isToday = dateStr === todayStr;
+    const isWeekend = i >= 5;
+
+    html += `<div class="p-2 text-center ${i < 6 ? 'border-r border-gray-200' : ''} ${isToday ? 'bg-blue-50' : ''}">
+      <div class="text-xs font-bold ${isWeekend ? 'text-blue-500' : 'text-gray-700'}">${DAY_NAMES_SR[i]}</div>
+      <div class="text-xs ${isToday ? 'text-blue-600 font-bold' : 'text-gray-400'}">${dayDate.getDate()}.${String(dayDate.getMonth() + 1).padStart(2, '0')}</div>
+    </div>`;
+  }
+  html += '</div>';
+
+  // Hour rows
+  for (let h = CAL_HOUR_START; h < CAL_HOUR_END; h++) {
+    html += '<div class="grid grid-cols-8 border-b border-gray-100 last:border-b-0">';
+
+    // Time label
+    html += `<div class="p-1.5 text-center text-xs font-mono font-semibold text-gray-400 border-r border-gray-200 flex items-center justify-center">${String(h).padStart(2, '0')}:00</div>`;
+
+    for (let i = 0; i < 7; i++) {
+      const dayDate = new Date(calWeekStart);
+      dayDate.setDate(dayDate.getDate() + i);
+      const dateStr = formatDateStr(dayDate);
+      const slotKey = `${dateStr}-${h}`;
+      const isBooked = calBookedSlots.has(slotKey);
+      const isPast = dateStr < todayStr || (dateStr === todayStr && h <= currentHour);
+      const isSelected = calSelectedSlots.some(s => s.date === dateStr && s.hour === h);
+
+      let cellClass = 'p-1 text-center transition-all ';
+      if (i < 6) cellClass += 'border-r border-gray-100 ';
+
+      let innerClass = 'rounded-md text-xs font-semibold py-1.5 px-1 ';
+
+      if (isSelected) {
+        innerClass += 'bg-gold-400 text-white shadow-sm';
+      } else if (isPast) {
+        innerClass += 'text-gray-200';
+      } else if (isBooked) {
+        innerClass += 'bg-red-100 text-red-400 line-through';
+      } else {
+        innerClass += 'bg-pitch-50 text-pitch-600 hover:bg-pitch-200 cursor-pointer';
+      }
+
+      const clickable = !isPast && !isBooked;
+
+      html += `<div class="${cellClass}">
+        <button type="button" class="${innerClass} w-full" ${clickable ? `data-date="${dateStr}" data-hour="${h}"` : 'disabled'} ${isBooked ? 'title="Zauzeto"' : ''}>
+          ${isPast ? '' : isBooked ? 'X' : isSelected ? h + ':00' : ''}
+        </button>
+      </div>`;
+    }
+
+    html += '</div>';
+  }
+
+  html += '</div>';
+  calWeekly.innerHTML = html;
+
+  // Click handlers - multi-select hours (same day only)
+  calWeekly.querySelectorAll('button[data-date]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const date = btn.dataset.date;
+      const hour = parseInt(btn.dataset.hour);
+
+      const existingIdx = calSelectedSlots.findIndex(s => s.date === date && s.hour === hour);
+
+      if (existingIdx !== -1) {
+        // Deselect this slot
+        calSelectedSlots.splice(existingIdx, 1);
+      } else {
+        // If selecting a different day, clear previous selection
+        if (calSelectedSlots.length > 0 && calSelectedSlots[0].date !== date) {
+          calSelectedSlots = [];
+        }
+        calSelectedSlots.push({ date, hour });
+        // Sort by hour
+        calSelectedSlots.sort((a, b) => a.hour - b.hour);
+      }
+
+      // Sync with form date input
+      const dateInput = document.getElementById('date');
+      if (calSelectedSlots.length > 0) {
+        const selDate = calSelectedSlots[0].date;
+        if (dateInput) dateInput.value = selDate;
+
+        // Build display text
+        const d = new Date(selDate);
+        const dayIdx = (d.getDay() + 6) % 7;
+        const hours = calSelectedSlots.map(s => String(s.hour).padStart(2, '0') + ':00');
+        const firstH = calSelectedSlots[0].hour;
+        const lastH = calSelectedSlots[calSelectedSlots.length - 1].hour + 1;
+        const rangeText = `${String(firstH).padStart(2, '0')}:00 - ${String(lastH).padStart(2, '0')}:00 (${calSelectedSlots.length}h)`;
+
+        calSelectedText.textContent = `${DAY_NAMES_FULL_SR[dayIdx]}, ${d.getDate()}. ${MONTH_NAMES_FULL_SR[d.getMonth()]} ${d.getFullYear()}. | ${rangeText}`;
+        calSelectedDiv.classList.remove('hidden');
+      } else {
+        if (dateInput) dateInput.value = '';
+        calSelectedDiv.classList.add('hidden');
+      }
+
+      // Re-render
+      renderWeeklyCalendar();
+    });
+  });
+}
+
+// ============================================
+// Month "Zoom Out" View
+// ============================================
+
+const calViewWeekBtn = document.getElementById('cal-view-week');
+const calViewMonthBtn = document.getElementById('cal-view-month');
+const calWeekNav = document.getElementById('cal-week-nav');
+const calMonthNav = document.getElementById('cal-month-nav');
+const calMonthGrid = document.getElementById('cal-month-grid');
+const calMonthLabel = document.getElementById('cal-month-label');
+const calMonthPrev = document.getElementById('cal-month-prev');
+const calMonthNext = document.getElementById('cal-month-next');
+
+let calCurrentView = 'week'; // 'week' or 'month'
+let calMonthViewMonth = new Date().getMonth();
+let calMonthViewYear = new Date().getFullYear();
+
+function switchView(view) {
+  calCurrentView = view;
+  const isWeek = view === 'week';
+
+  // Toggle buttons
+  calViewWeekBtn.classList.toggle('bg-white', isWeek);
+  calViewWeekBtn.classList.toggle('text-gray-900', isWeek);
+  calViewWeekBtn.classList.toggle('shadow-sm', isWeek);
+  calViewWeekBtn.classList.toggle('text-gray-500', !isWeek);
+
+  calViewMonthBtn.classList.toggle('bg-white', !isWeek);
+  calViewMonthBtn.classList.toggle('text-gray-900', !isWeek);
+  calViewMonthBtn.classList.toggle('shadow-sm', !isWeek);
+  calViewMonthBtn.classList.toggle('text-gray-500', isWeek);
+
+  // Toggle sections
+  calWeekNav.classList.toggle('hidden', !isWeek);
+  calWeekly.classList.toggle('hidden', !isWeek);
+  calMonthNav.classList.toggle('hidden', isWeek);
+  calMonthGrid.classList.toggle('hidden', isWeek);
+
+  // Also hide/show the scroll wrapper
+  calWeekly.closest('.overflow-x-auto').classList.toggle('hidden', !isWeek);
+
+  if (!isWeek) renderMonthView();
+}
+
+function renderMonthView() {
+  calMonthLabel.textContent = `${MONTH_NAMES_FULL_SR[calMonthViewMonth]} ${calMonthViewYear}`;
+
+  const firstDay = new Date(calMonthViewYear, calMonthViewMonth, 1);
+  const lastDay = new Date(calMonthViewYear, calMonthViewMonth + 1, 0);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  let startDow = firstDay.getDay() - 1;
+  if (startDow < 0) startDow = 6;
+
+  let html = '<div class="grid grid-cols-7 gap-1 mb-2">';
+  DAY_NAMES_SR.forEach((name, i) => {
+    html += `<div class="text-center text-xs font-semibold ${i >= 5 ? 'text-blue-500' : 'text-gray-400'} py-2">${name}</div>`;
+  });
+  html += '</div><div class="grid grid-cols-7 gap-1">';
+
+  for (let i = 0; i < startDow; i++) {
+    html += '<div></div>';
+  }
+
+  for (let day = 1; day <= lastDay.getDate(); day++) {
+    const dateObj = new Date(calMonthViewYear, calMonthViewMonth, day);
+    const dateStr = formatDateStr(dateObj);
+    const isPast = dateObj < today;
+    const isSelectedWeek = calWeekStart && dateObj >= calWeekStart && dateObj < new Date(calWeekStart.getTime() + 7 * 86400000);
+
+    let classes = 'w-full aspect-square rounded-lg flex items-center justify-center text-sm font-semibold transition-all ';
+
+    if (isPast) {
+      classes += 'text-gray-300 cursor-not-allowed';
+    } else if (isSelectedWeek) {
+      classes += 'bg-blue-100 text-blue-700 ring-2 ring-blue-300 cursor-pointer hover:bg-blue-200';
+    } else {
+      classes += 'bg-gray-50 text-gray-700 hover:bg-pitch-100 cursor-pointer hover:shadow-sm';
+    }
+
+    if (dateStr === formatDateStr(today)) {
+      classes += ' ring-2 ring-gold-400';
+    }
+
+    html += `<button type="button" class="${classes}" ${!isPast ? `data-week-date="${dateStr}"` : 'disabled'}>${day}</button>`;
+  }
+
+  html += '</div>';
+  calMonthGrid.innerHTML = html;
+
+  // Click on a day -> jump to that week in week view
+  calMonthGrid.querySelectorAll('button[data-week-date]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const d = new Date(btn.dataset.weekDate);
+      calWeekStart = getMonday(d);
+      switchView('week');
+      renderWeeklyCalendar();
+    });
+  });
+}
+
+// View toggle buttons
+calViewWeekBtn.addEventListener('click', () => switchView('week'));
+calViewMonthBtn.addEventListener('click', () => switchView('month'));
+
+// Week navigation
+calPrev.addEventListener('click', () => {
+  const now = getMonday(new Date());
+  if (calWeekStart <= now) return;
+  calWeekStart.setDate(calWeekStart.getDate() - 7);
+  renderWeeklyCalendar();
+});
+
+calNext.addEventListener('click', () => {
+  calWeekStart.setDate(calWeekStart.getDate() + 7);
+  renderWeeklyCalendar();
+});
+
+// Month navigation
+calMonthPrev.addEventListener('click', () => {
+  const now = new Date();
+  if (calMonthViewYear === now.getFullYear() && calMonthViewMonth <= now.getMonth()) return;
+  calMonthViewMonth--;
+  if (calMonthViewMonth < 0) { calMonthViewMonth = 11; calMonthViewYear--; }
+  renderMonthView();
+});
+
+calMonthNext.addEventListener('click', () => {
+  calMonthViewMonth++;
+  if (calMonthViewMonth > 11) { calMonthViewMonth = 0; calMonthViewYear++; }
+  renderMonthView();
+});
+
+// Initialize calendar
+renderWeeklyCalendar();
 
 // Set min date to today
 const dateInput = document.getElementById('date');
