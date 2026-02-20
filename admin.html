@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="sr" class="scroll-smooth">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel | Zlatna Lopta</title>
+  <meta name="robots" content="noindex, nofollow">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            gold: {
+              50: '#fffbeb', 100: '#fef3c7', 200: '#fde68a', 300: '#fcd34d',
+              400: '#fbbf24', 500: '#f59e0b', 600: '#d97706', 700: '#b45309',
+              800: '#92400e', 900: '#78350f',
+            },
+            pitch: {
+              50: '#f0fdf4', 100: '#dcfce7', 200: '#bbf7d0', 300: '#86efac',
+              400: '#4ade80', 500: '#22c55e', 600: '#16a34a', 700: '#15803d',
+              800: '#166534', 900: '#14532d',
+            }
+          },
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] }
+        }
+      }
+    }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="font-sans text-gray-800 bg-gray-50 antialiased min-h-screen">
+
+  <!-- ====================================================
+       LOGIN SEKCIJA
+       ==================================================== -->
+  <div id="login-section" class="min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-lg border border-gray-200 w-full max-w-sm overflow-hidden">
+      <div class="bg-gradient-to-r from-pitch-700 to-pitch-800 px-6 py-6 text-center">
+        <img src="assets/img/logo.png" alt="Logo" class="w-14 h-14 object-contain mx-auto mb-3">
+        <h1 class="text-xl font-black text-white">Admin Panel</h1>
+        <p class="text-pitch-200 text-xs mt-1">Zlatna Lopta — Upravljanje terminima</p>
+      </div>
+
+      <div class="p-6 space-y-4">
+        <div>
+          <label for="admin-email" class="block text-sm font-semibold text-gray-700 mb-1">Email</label>
+          <input type="email" id="admin-email" autocomplete="email"
+            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-pitch-500 focus:ring-2 focus:ring-pitch-500/20 outline-none transition-all text-sm"
+            placeholder="admin@zlatnalopta.rs">
+        </div>
+        <div>
+          <label for="admin-password" class="block text-sm font-semibold text-gray-700 mb-1">Lozinka</label>
+          <input type="password" id="admin-password" autocomplete="current-password"
+            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-pitch-500 focus:ring-2 focus:ring-pitch-500/20 outline-none transition-all text-sm"
+            placeholder="••••••••">
+        </div>
+
+        <div id="login-error" class="hidden bg-red-50 border border-red-200 rounded-xl p-3">
+          <p class="text-red-600 text-sm text-center font-semibold" id="login-error-text"></p>
+        </div>
+
+        <button id="login-btn"
+          class="w-full bg-pitch-600 hover:bg-pitch-700 text-white py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+          </svg>
+          Prijavite se
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================================================
+       ADMIN KALENDAR SEKCIJA (skrivena dok se ne uloguje)
+       ==================================================== -->
+  <div id="admin-section" class="hidden">
+
+    <!-- Header -->
+    <header class="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50">
+      <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <img src="assets/img/logo.png" alt="Logo" class="w-10 h-10 object-contain">
+          <div>
+            <span class="font-black text-gray-900">Admin Panel</span>
+            <span class="text-gray-400 text-sm ml-2">— Upravljanje terminima</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <a href="booking.html" target="_blank"
+            class="text-sm font-semibold text-gray-500 hover:text-gray-700 transition-colors hidden sm:inline">
+            Pogledaj sajt
+          </a>
+          <button id="logout-btn"
+            class="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-xl font-semibold text-sm transition-all">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+            </svg>
+            Odjavi se
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 py-6">
+
+      <!-- Legenda i uputstvo -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 mb-6">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h2 class="font-bold text-gray-900 mb-1">Upravljanje zauzetim terminima</h2>
+            <p class="text-gray-500 text-sm">Kliknite na sat da ga <strong>markirate kao zauzet</strong> ili <strong>oslobodite</strong>. Promene se odmah čuvaju.</p>
+          </div>
+          <div class="flex flex-wrap gap-3 text-sm">
+            <span class="inline-flex items-center gap-1.5">
+              <span class="w-4 h-4 rounded bg-pitch-100 border border-pitch-300 inline-block"></span>
+              Slobodan
+            </span>
+            <span class="inline-flex items-center gap-1.5">
+              <span class="w-4 h-4 rounded bg-red-500 inline-block"></span>
+              Zauzet
+            </span>
+            <span class="inline-flex items-center gap-1.5">
+              <span class="w-4 h-4 rounded bg-gray-200 inline-block"></span>
+              Prošlost
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigacija nedeljom -->
+      <div class="flex items-center justify-between mb-4">
+        <button id="admin-cal-prev"
+          class="w-10 h-10 bg-white border border-gray-200 hover:bg-gray-50 rounded-xl flex items-center justify-center shadow-sm transition-all"
+          aria-label="Prethodna nedelja">
+          <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+        </button>
+        <h2 id="admin-cal-week-label" class="text-lg font-bold text-gray-900 text-center"></h2>
+        <button id="admin-cal-next"
+          class="w-10 h-10 bg-white border border-gray-200 hover:bg-gray-50 rounded-xl flex items-center justify-center shadow-sm transition-all"
+          aria-label="Sledeća nedelja">
+          <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Status poruka -->
+      <div id="admin-status" class="hidden mb-4 px-4 py-3 rounded-xl text-sm font-semibold text-center"></div>
+
+      <!-- Kalendar grid -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+        <!-- Loading stanje -->
+        <div id="admin-cal-loading" class="py-16 text-center">
+          <svg class="w-8 h-8 animate-spin text-pitch-500 mx-auto mb-3" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <p class="text-gray-400 text-sm">Učitavanje termina...</p>
+        </div>
+        <!-- Kalendar sadržaj -->
+        <div class="overflow-x-auto">
+          <div id="admin-cal-grid" class="min-w-[700px]"></div>
+        </div>
+      </div>
+
+      <!-- Brzi pregled ove sedmice -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
+        <h3 class="font-bold text-gray-900 mb-3">Zauzeti termini ove nedelje</h3>
+        <div id="admin-booked-list" class="text-gray-400 text-sm italic">Nema zauzetih termina ove nedelje.</div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Supabase JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="admin.js"></script>
+</body>
+
+</html>

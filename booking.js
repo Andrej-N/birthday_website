@@ -377,18 +377,14 @@ if (successModal) {
 }
 
 // ============================================
-// Weekly Calendar - Google Calendar Integration
+// Weekly Calendar - Custom Supabase Backend
 // ============================================
 
-// UPUTSTVO: Zameni ove vrednosti sa tvojim
-// 1. Napravi Google Cloud projekat: https://console.cloud.google.com/
-// 2. Uključi "Google Calendar API"
-// 3. Napravi API Key (ograniči na Calendar API + tvoj domen)
-// 4. U Google Calendar podešavanjima, postavi kalendar kao javan
-// 5. Kopiraj Calendar ID (obično izgleda kao email adresa)
-// 6. U Google Calendaru dodaj događaje za zauzete termine (npr. "Rođendan" od 16:00-18:00)
-const GCAL_API_KEY = 'TVOJ_API_KEY_OVDE';
-const GCAL_CALENDAR_ID = 'TVOJ_CALENDAR_ID_OVDE';
+// *** POPUNITE SA VAŠEG SUPABASE PROJEKTA (Settings > API) ***
+const SUPABASE_URL = 'https://gcwghdkauccoysvjbtoi.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdjd2doZGthdWNjb3lzdmpidG9pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE1NzkwNzEsImV4cCI6MjA4NzE1NTA3MX0.ejulEoU4Xg4J-PLW3Tsp0skv4Mq07abiHBzz7U1KnLE';
+
+const _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Kalendar prikazuje sate od 9:00 do 24:00
 const CAL_HOUR_START = 9;
@@ -428,47 +424,33 @@ let calWeekStart = getMonday(new Date());
 let calBookedSlots = new Set(); // Set of "YYYY-MM-DD-HH" strings
 let calSelectedSlots = []; // Array of { date: "YYYY-MM-DD", hour: 14 }
 
-// Fetch booked slots from Google Calendar for a given week
+// Fetch booked slots from Supabase for a given week
 async function fetchBookedSlots(weekStart) {
-  const timeMin = new Date(weekStart).toISOString();
   const weekEnd = new Date(weekStart);
-  weekEnd.setDate(weekEnd.getDate() + 7);
-  const timeMax = weekEnd.toISOString();
+  weekEnd.setDate(weekEnd.getDate() + 6);
 
-  const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(GCAL_CALENDAR_ID)}/events?key=${GCAL_API_KEY}&timeMin=${timeMin}&timeMax=${timeMax}&singleEvents=true&orderBy=startTime&maxResults=200`;
+  const dateFrom = formatDateStr(weekStart);
+  const dateTo = formatDateStr(weekEnd);
 
   try {
     calLoading.classList.remove('hidden');
     calError.classList.add('hidden');
-    const res = await fetch(url);
-    if (!res.ok) throw new Error('API error');
-    const data = await res.json();
+
+    const { data, error } = await _supabase
+      .from('booked_slots')
+      .select('date, hour')
+      .gte('date', dateFrom)
+      .lte('date', dateTo);
+
+    if (error) throw error;
 
     const booked = new Set();
-    (data.items || []).forEach(event => {
-      if (event.start.date) {
-        // All-day event: mark all hours of that day as booked
-        const startD = new Date(event.start.date);
-        const endD = new Date(event.end.date);
-        for (let d = new Date(startD); d < endD; d.setDate(d.getDate() + 1)) {
-          const ds = d.toISOString().split('T')[0];
-          for (let h = CAL_HOUR_START; h < CAL_HOUR_END; h++) {
-            booked.add(`${ds}-${h}`);
-          }
-        }
-      } else if (event.start.dateTime) {
-        // Timed event: mark each hour the event covers
-        const start = new Date(event.start.dateTime);
-        const end = new Date(event.end.dateTime);
-        for (let t = new Date(start); t < end; t.setHours(t.getHours() + 1)) {
-          const ds = `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(t.getDate()).padStart(2, '0')}`;
-          booked.add(`${ds}-${t.getHours()}`);
-        }
-      }
+    (data || []).forEach(row => {
+      booked.add(`${row.date}-${row.hour}`);
     });
     return booked;
   } catch (err) {
-    console.error('Google Calendar fetch error:', err);
+    console.error('Supabase fetch error:', err);
     calError.classList.remove('hidden');
     return new Set();
   } finally {
