@@ -11,7 +11,7 @@ const EMAILJS_TEMPLATE_ID = 'template_ykc7ccp';
 emailjs.init(EMAILJS_PUBLIC_KEY);
 
 const PRICES = {
-  rentalPerHour: 10000, // RSD
+  rentalPerHour: 11000, // RSD
   animatorSmall: 6000,  // RSD (<15 dece, 1 animator) - PROMO
   animatorLarge: 12000, // RSD (15-30 dece, 2 animatora) - PROMO
   olympicPackage: 26000, // RSD (includes animators)
