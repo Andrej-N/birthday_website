@@ -296,7 +296,7 @@ bookingForm.addEventListener('submit', (e) => {
     'Željeni datum: ' + date + '\n' +
     (calSelectedSlots.length > 0 ? 'Željeni termini: ' + calSelectedSlots.map(s => String(s.hour).padStart(2, '0') + ':00').join(', ') + ' (' + calSelectedSlots.length + 'h, ' + String(calSelectedSlots[0].hour).padStart(2, '0') + ':00-' + String(calSelectedSlots[calSelectedSlots.length - 1].hour + 1).padStart(2, '0') + ':00)' + '\n' : '') + '\n' +
     'IZABRANI PAKET:\n' +
-    'Iznajmljivanje: ' + state.hours + 'h x 10.000 RSD = ' + formatRSD(rentalTotal) + '\n' +
+    'Iznajmljivanje: ' + state.hours + 'h x 11.000 RSD = ' + formatRSD(rentalTotal) + '\n' +
     'Program: ' + programText + '\n' +
     (addonsText ? addonsText + '\n' : '') +
     (foodText ? '\nHRANA / TORTA:\n' + foodText : '') +
