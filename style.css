@@ -5,6 +5,11 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Prevent horizontal overflow on mobile without blocking child scroll containers */
+main {
+  overflow-x: clip;
+}
+
 /* Gallery hover zoom effect */
 .gallery-item > div:first-child,
 .gallery-item > div:nth-child(2) {

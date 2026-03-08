@@ -42,7 +42,7 @@
    - Ime: **Zlatna Lopta Sportski Balon**
    - Kategorija: **Sports complex** ili **Children's party service**
    - Adresa: tačna adresa na Vračaru
-   - Telefon: **+381 65 82 00 252**
+   - Telefon: **062 828 6401**
    - Sajt: **https://zlatnalopta.rs**
    - Radno vreme: **09:00 - 22:00, svaki dan**
 4. Google će ti poslati **razglednicu sa kodom** na adresu (ili verifikacija telefonom)
